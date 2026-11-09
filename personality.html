@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Space Vocabulary Quiz</title>
+    <style>
+        /* --- КОСМИЧЕСКИЙ ФОН --- */
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: radial-gradient(circle at bottom, #1b2735 0%, #090a0f 100%);
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* Слой со звездами */
+        .stars {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            background-image: 
+                radial-gradient(1px 1px at 20px 30px, #fff, rgba(0,0,0,0)),
+                radial-gradient(1px 1px at 40px 70px, #fff, rgba(0,0,0,0)),
+                radial-gradient(2px 2px at 90px 40px, #fff, rgba(0,0,0,0)),
+                radial-gradient(1px 1px at 130px 80px, #fff, rgba(0,0,0,0)),
+                radial-gradient(2px 2px at 160px 120px, #fff, rgba(0,0,0,0));
+            background-repeat: repeat;
+            background-size: 200px 200px;
+            animation: twinkle 4s infinite alternate;
+        }
+
+        @keyframes twinkle {
+            0% { opacity: 0.3; }
+            100% { opacity: 1; }
+        }
+
+        /* --- КОНТЕЙНЕР И КАРТОЧКА --- */
+        .card-container {
+            position: relative;
+            width: 90%;
+            max-width: 650px;
+            height: 380px;
+            z-index: 1;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 24px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.5), inset 0 0 20px rgba(255,255,255,0.05);
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 40px;
+            box-sizing: border-box;
+            position: absolute;
+            top: 0;
+            left: 0;
+            transition: transform 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55), opacity 0.4s;
+            text-align: center;
+        }
+
+        .card.hide {
+            transform: translateX(150%) rotate(15deg) scale(0.8);
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        /* --- ТЕКСТ --- */
+        .sentence {
+            font-size: 26px;
+            color: #ffffff;
+            margin-bottom: 50px;
+            line-height: 1.5;
+            font-weight: 500;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.5);
+        }
+
+        /* --- КНОПКИ --- */
+        .buttons {
+            display: flex;
+            gap: 25px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid #00e5ff;
+            color: #00e5ff;
+            padding: 15px 40px;
+            font-size: 20px;
+            border-radius: 50px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 10px rgba(0, 229, 255, 0.2), inset 0 0 10px rgba(0, 229, 255, 0.1);
+            text-transform: capitalize;
+            letter-spacing: 1px;
+        }
+
+        .btn:hover {
+            transform: translateY(-5px) scale(1.05);
+            background: rgba(0, 229, 255, 0.15);
+            box-shadow: 0 0 20px rgba(0, 229, 255, 0.6), inset 0 0 15px rgba(0, 229, 255, 0.4);
+            text-shadow: 0 0 10px #00e5ff;
+        }
+
+        .btn:active {
+            transform: translateY(0) scale(0.98);
+        }
+
+        .btn.correct {
+            background: rgba(76, 175, 80, 0.2) !important;
+            border-color: #4CAF50 !important;
+            color: #4CAF50 !important;
+            box-shadow: 0 0 30px rgba(76, 175, 80, 0.8), inset 0 0 20px rgba(76, 175, 80, 0.5);
+            text-shadow: 0 0 10px #4CAF50;
+        }
+
+        .btn.wrong {
+            background: rgba(244, 67, 54, 0.2) !important;
+            border-color: #f44336 !important;
+            color: #f44336 !important;
+            box-shadow: 0 0 30px rgba(244, 67, 54, 0.8), inset 0 0 20px rgba(244, 67, 54, 0.5);
+            animation: shake 0.4s;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            50% { transform: translateX(10px); }
+            75% { transform: translateX(-10px); }
+        }
+
+        /* --- ЭКРАН ЗАВЕРШЕНИЯ --- */
+        .finish-screen {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            padding: 50px;
+            border-radius: 24px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5), 0 0 50px rgba(0, 229, 255, 0.3);
+            z-index: 2;
+            animation: popIn 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+        
+        @keyframes popIn {
+            0% { transform: scale(0.5); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .finish-screen h2 {
+            color: #00e5ff;
+            font-size: 38px;
+            margin-bottom: 10px;
+            text-shadow: 0 0 20px rgba(0, 229, 255, 0.8);
+            text-align: center;
+        }
+
+        .finish-screen p {
+            font-size: 22px; 
+            color: #fff;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Фон со звездами -->
+    <div class="stars"></div>
+
+    <div class="card-container" id="cardContainer">
+        <!-- Карточки генерируются скриптом -->
+    </div>
+
+    <!-- Обновленный финальный экран на английском -->
+    <div class="finish-screen" id="finishScreen">
+        <h2>Great job! 🚀</h2>
+        <p>You have completed all the cards!</p>
+    </div>
+
+    <script>
+        // Данные упражнения (без изменений)
+        const questions = [
+            { text: "My friend talks to everyone at school. He is very...", options: ["patient", "sociable"], correct: "sociable" },
+            { text: "I can't wait for my birthday, but I have to be...", options: ["daring", "patient"], correct: "patient" },
+            { text: "She loves to run, jump, and play sports. She is very...", options: ["athletic", "curious"], correct: "athletic" },
+            { text: "He is not afraid of spiders or dark rooms. He is very...", options: ["creative", "daring"], correct: "daring" },
+            { text: "My cousin always wants to know how things work. He is...", options: ["curious", "sociable"], correct: "curious" },
+            { text: "You need to practice for many years to play the violin well. You must be...", options: ["determined", "imaginative"], correct: "determined" },
+            { text: "She makes up amazing fantasy worlds in her head. She is...", options: ["imaginative", "fit"], correct: "imaginative" },
+            { text: "He never gives up when he has a problem. He is very...", options: ["patient", "determined"], correct: "determined" },
+            { text: "I love going to parties and talking to people. I am a...", options: ["sociable", "daring"], correct: "sociable" },
+            { text: "My mom can wait for me for hours while I shop. She is so...", options: ["patient", "athletic"], correct: "patient" }
+        ];
+
+        let currentQuestionIndex = 0;
+        const container = document.getElementById('cardContainer');
+        const finishScreen = document.getElementById('finishScreen');
+
+        // Генератор звуков
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        
+        function playSound(type) {
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            const oscillator = audioCtx.createOscillator();
+            const gainNode = audioCtx.createGain();
+            oscillator.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+            
+            if (type === 'correct') {
+                oscillator.type = 'sine';
+                oscillator.frequency.setValueAtTime(880, audioCtx.currentTime);
+                oscillator.frequency.exponentialRampToValueAtTime(1760, audioCtx.currentTime + 0.1);
+                gainNode.gain.setValueAtTime(0.2, audioCtx.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.6);
+                oscillator.start();
+                oscillator.stop(audioCtx.currentTime + 0.6);
+            } else {
+                oscillator.type = 'triangle';
+                oscillator.frequency.setValueAtTime(200, audioCtx.currentTime);
+                gainNode.gain.setValueAtTime(0.2, audioCtx.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
+                oscillator.start();
+                oscillator.stop(audioCtx.currentTime + 0.3);
+            }
+        }
+
+        // Отрисовка карточки
+        function renderCard() {
+            if (currentQuestionIndex >= questions.length) {
+                container.style.display = 'none';
+                finishScreen.style.display = 'flex';
+                playSound('correct');
+                return;
+            }
+
+            const q = questions[currentQuestionIndex];
+            const card = document.createElement('div');
+            card.className = 'card';
+            
+            card.innerHTML = `
+                <div class="sentence">${q.text}</div>
+                <div class="buttons">
+                    <button class="btn" data-value="${q.options[0]}">${q.options[0]}</button>
+                    <button class="btn" data-value="${q.options[1]}">${q.options[1]}</button>
+                </div>
+            `;
+            
+            container.appendChild(card);
+
+            const buttons = card.querySelectorAll('.btn');
+            buttons.forEach(btn => {
+                btn.addEventListener('click', (e) => handleAnswer(e.target, card, q.correct));
+            });
+        }
+
+        // Обработка ответа
+        function handleAnswer(button, card, correctAnswer) {
+            const selectedValue = button.getAttribute('data-value');
+            const allBtns = card.querySelectorAll('.btn');
+            allBtns.forEach(b => b.style.pointerEvents = 'none');
+
+            if (selectedValue === correctAnswer) {
+                button.classList.add('correct');
+                playSound('correct');
+                
+                setTimeout(() => {
+                    card.classList.add('hide');
+                    currentQuestionIndex++;
+                    setTimeout(() => {
+                        card.remove(); 
+                        renderCard();  
+                    }, 600); 
+                }, 600);
+            } else {
+                button.classList.add('wrong');
+                playSound('wrong');
+                
+                setTimeout(() => {
+                    button.classList.remove('wrong');
+                    allBtns.forEach(b => b.style.pointerEvents = 'auto');
+                }, 1000);
+            }
+        }
+
+        // Старт
+        renderCard();
+    </script>
+</body>
+</html>
